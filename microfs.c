@@ -9,13 +9,7 @@
 #include "sdcard.h"
 #include <string.h>
 
-/* Tabla de archivos en RAM (512 bytes) - exportada para ASM */
-uint8_t filetab[512];
-
-/* Buffer de sector - exportado para ASM */
-uint8_t secbuf[512];
-
-/* Estado archivo abierto - exportados para ASM */
+/* Estado archivo abierto - ANTES de los buffers para evitar corrupción */
 uint8_t  f_open;
 uint8_t  f_dirty;        /* Sector modificado */
 uint8_t  f_idx;          /* Índice en tabla */
@@ -24,6 +18,12 @@ uint16_t f_size;
 uint16_t f_pos;
 uint16_t f_sector;
 uint16_t f_offset;
+
+/* Tabla de archivos en RAM (512 bytes) - exportada para ASM */
+uint8_t filetab[512];
+
+/* Buffer de sector - exportado para ASM */
+uint8_t secbuf[512];
 
 /* Funciones en ASM (microfs_asm.s) */
 extern uint8_t mfs_streq(const char *a, const char *b);
@@ -151,13 +151,11 @@ uint16_t mfs_read(void *buf, uint16_t len) {
                 sd_write_sector(f_sector, secbuf);
                 f_dirty = 0;
             }
-            /* Avanzar al siguiente sector si no es la primera vez */
-            if (f_offset == 512 && f_pos > 0) {
-                f_sector++;
-            }
+            /* Calcular qué sector necesitamos basado en posición */
+            f_sector = f_start + (f_pos / 512);
             /* Cargar nuevo sector */
             sd_read_sector(f_sector, secbuf);
-            f_offset = 0;
+            f_offset = f_pos % 512;
         }
         
         /* Calcular cuántos bytes leer */
@@ -191,13 +189,11 @@ uint16_t mfs_write(const void *buf, uint16_t len) {
                 sd_write_sector(f_sector, secbuf);
                 f_dirty = 0;
             }
-            /* Avanzar al siguiente sector si no es la primera vez */
-            if (f_offset == 512 && f_pos > 0) {
-                f_sector++;
-            }
+            /* Calcular qué sector necesitamos basado en posición */
+            f_sector = f_start + (f_pos / 512);
             /* Cargar nuevo sector */
             sd_read_sector(f_sector, secbuf);
-            f_offset = 0;
+            f_offset = f_pos % 512;
         }
         
         /* Calcular cuántos bytes escribir */
@@ -263,4 +259,8 @@ uint8_t mfs_list(uint8_t index, mfs_fileinfo_t *info) {
     info->index = index;
     
     return MFS_OK;
+}
+
+uint16_t mfs_get_size(void) {
+    return f_size;
 }

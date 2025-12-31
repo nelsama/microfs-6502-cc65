@@ -61,4 +61,7 @@ uint8_t mfs_delete(const char *name);
 /* Listar archivo por índice */
 uint8_t mfs_list(uint8_t index, mfs_fileinfo_t *info);
 
+/* Obtener tamaño del archivo abierto */
+uint16_t mfs_get_size(void);
+
 #endif
