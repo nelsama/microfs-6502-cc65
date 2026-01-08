@@ -19,12 +19,11 @@ uint16_t f_pos;
 uint16_t f_sector;
 uint16_t f_offset;
 
-/* Buffers en zona alta de RAM para no interferir con programas en $0400+ */
-/* filetab: $3800-$39FF (512 bytes) */
-/* secbuf:  $3A00-$3BFF (512 bytes) */
-/* Programas usuario: $0400-$37FF (~13KB) */
-uint8_t * const filetab = (uint8_t *)0x3800;
-uint8_t * const secbuf  = (uint8_t *)0x3A00;
+/* Tabla de archivos en RAM (512 bytes) - exportada para ASM */
+uint8_t filetab[512];
+
+/* Buffer de sector - exportado para ASM */
+uint8_t secbuf[512];
 
 /* Funciones en ASM (microfs_asm.s) */
 extern uint8_t mfs_streq(const char *a, const char *b);
