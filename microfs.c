@@ -19,11 +19,12 @@ uint16_t f_pos;
 uint16_t f_sector;
 uint16_t f_offset;
 
-/* Tabla de archivos en RAM (512 bytes) - exportada para ASM */
-uint8_t filetab[512];
-
-/* Buffer de sector - exportado para ASM */
-uint8_t secbuf[512];
+/* Buffers en zona alta de RAM para no interferir con programas en $0400+ */
+/* filetab: $3800-$39FF (512 bytes) */
+/* secbuf:  $3A00-$3BFF (512 bytes) */
+/* Programas usuario: $0400-$37FF (~13KB) */
+uint8_t * const filetab = (uint8_t *)0x3800;
+uint8_t * const secbuf  = (uint8_t *)0x3A00;
 
 /* Funciones en ASM (microfs_asm.s) */
 extern uint8_t mfs_streq(const char *a, const char *b);
@@ -139,37 +140,39 @@ uint8_t mfs_create(const char *name, uint16_t size) {
 uint16_t mfs_read(void *buf, uint16_t len) {
     uint8_t *dst = (uint8_t *)buf;
     uint16_t total = 0;
-    uint16_t n;
+    uint16_t chunk;
+    uint16_t need_sector;
     
     if (!f_open) return 0;
     
     while (len && f_pos < f_size) {
-        /* Cargar sector si es necesario */
-        if (f_offset >= 512) {
+        /* Calcular qué sector necesitamos */
+        need_sector = f_start + (f_pos / 512);
+        
+        /* Cargar sector si es diferente al actual o primera lectura */
+        if (f_offset >= 512 || f_sector != need_sector) {
             /* Guardar sector anterior si fue modificado */
             if (f_dirty) {
                 sd_write_sector(f_sector, secbuf);
                 f_dirty = 0;
             }
-            /* Calcular qué sector necesitamos basado en posición */
-            f_sector = f_start + (f_pos / 512);
-            /* Cargar nuevo sector */
+            f_sector = need_sector;
             sd_read_sector(f_sector, secbuf);
             f_offset = f_pos % 512;
         }
         
-        /* Calcular cuántos bytes leer */
-        n = 512 - f_offset;
-        if (n > len) n = len;
-        if (f_pos + n > f_size) n = f_size - f_pos;
+        /* Calcular cuántos bytes leer de este sector */
+        chunk = 512 - f_offset;
+        if (chunk > len) chunk = len;
+        if (f_pos + chunk > f_size) chunk = f_size - f_pos;
         
         /* Copiar datos del buffer */
-        len -= n;
-        total += n;
-        while (n--) {
-            *dst++ = secbuf[f_offset++];
-            f_pos++;
-        }
+        memcpy(dst, secbuf + f_offset, chunk);
+        dst += chunk;
+        f_offset += chunk;
+        f_pos += chunk;
+        len -= chunk;
+        total += chunk;
     }
     return total;
 }
@@ -177,37 +180,39 @@ uint16_t mfs_read(void *buf, uint16_t len) {
 uint16_t mfs_write(const void *buf, uint16_t len) {
     const uint8_t *src = (const uint8_t *)buf;
     uint16_t total = 0;
-    uint16_t n;
+    uint16_t chunk;
+    uint16_t need_sector;
     
     if (!f_open) return 0;
     
     while (len && f_pos < f_size) {
-        /* Cargar sector si es necesario */
-        if (f_offset >= 512) {
+        /* Calcular qué sector necesitamos */
+        need_sector = f_start + (f_pos / 512);
+        
+        /* Cargar sector si es diferente al actual o primera escritura */
+        if (f_offset >= 512 || f_sector != need_sector) {
             /* Guardar sector anterior si fue modificado */
             if (f_dirty) {
                 sd_write_sector(f_sector, secbuf);
                 f_dirty = 0;
             }
-            /* Calcular qué sector necesitamos basado en posición */
-            f_sector = f_start + (f_pos / 512);
-            /* Cargar nuevo sector */
+            f_sector = need_sector;
             sd_read_sector(f_sector, secbuf);
             f_offset = f_pos % 512;
         }
         
-        /* Calcular cuántos bytes escribir */
-        n = 512 - f_offset;
-        if (n > len) n = len;
-        if (f_pos + n > f_size) n = f_size - f_pos;
+        /* Calcular cuántos bytes escribir en este sector */
+        chunk = 512 - f_offset;
+        if (chunk > len) chunk = len;
+        if (f_pos + chunk > f_size) chunk = f_size - f_pos;
         
         /* Copiar datos al buffer */
-        len -= n;
-        total += n;
-        while (n--) {
-            secbuf[f_offset++] = *src++;
-            f_pos++;
-        }
+        memcpy(secbuf + f_offset, src, chunk);
+        src += chunk;
+        f_offset += chunk;
+        f_pos += chunk;
+        len -= chunk;
+        total += chunk;
         f_dirty = 1;
     }
     return total;

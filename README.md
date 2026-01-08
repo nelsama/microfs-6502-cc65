@@ -8,7 +8,24 @@ Sistema de archivos minimalista para sistemas 6502 con cc65.
 - Nombres formato 8.3 (12 caracteres)
 - Operaciones: crear, leer, escribir, eliminar, listar
 - Compatible con herramienta Python para acceso desde PC
+- Buffers en zona alta de RAM ($3800-$3BFF) para no interferir con programas en $0400+
 - Tamaño: ~2.8 KB
+
+## Mapa de Memoria
+
+```
+$0400-$37FF  Área libre para programas usuario (~13KB)
+$3800-$39FF  filetab - Tabla de archivos (512 bytes)
+$3A00-$3BFF  secbuf  - Buffer de sector (512 bytes)
+```
+
+Los buffers están en direcciones fijas para evitar conflictos con programas 
+cargados en $0400. Si necesitas cambiar estas direcciones, modifica en `microfs.c`:
+
+```c
+uint8_t * const filetab = (uint8_t *)0x3800;
+uint8_t * const secbuf  = (uint8_t *)0x3A00;
+```
 
 ## Instalación
 
@@ -149,6 +166,17 @@ $(BUILD_DIR)/microfs_asm.o: $(MICROFS_DIR)/microfs_asm.s
 - Archivos contiguos (sin fragmentación)
 - Tamaño máximo: 65535 bytes por archivo
 - Sin timestamps
+- RAM requerida: 1024 bytes fijos ($3800-$3BFF)
+
+## Changelog
+
+### v1.1.0
+- **Fix**: Corregido bug en `mfs_read()` y `mfs_write()` que fallaba al leer/escribir archivos mayores a 512 bytes
+- **Cambio**: Buffers movidos a zona alta de RAM ($3800-$3BFF) para no interferir con programas en $0400+
+- **Optimización**: Uso de `memcpy()` en lugar de copia byte a byte
+
+### v1.0.0
+- Versión inicial
 
 ## Licencia
 
