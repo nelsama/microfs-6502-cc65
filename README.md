@@ -7,7 +7,6 @@ Sistema de archivos minimalista para sistemas 6502 con cc65.
 - Máximo 16 archivos
 - Nombres formato 8.3 (12 caracteres)
 - Operaciones: crear, leer, escribir, eliminar, listar
-- Compatible con herramienta Python para acceso desde PC
 - Tamaño: ~2.8 KB
 
 ## Memoria
@@ -112,21 +111,16 @@ Entrada de archivo (32 bytes):
 Sector 1+: Datos de archivos (contiguos)
 ```
 
-## Herramienta PC (Python)
+## MicroFS Browser (GUI)
 
-```bash
-# Listar archivos
-python microfs.py /dev/sdX list
+Para formatear y navegar archivos en una SD con formato MicroFS desde un PC, usa **MicroFS Browser**:
 
-# Leer archivo
-python microfs.py /dev/sdX read HELLO.TXT
-
-# Escribir archivo
-python microfs.py /dev/sdX write HELLO.TXT "contenido"
-
-# Formatear
-python microfs.py /dev/sdX format
-```
+- Repositorio: https://github.com/nelsama/MicroFSBrowser
+- Requiere Java JDK 8+ y permisos de administrador para acceso a dispositivos físicos.
+- Funciones: conectar, formatear (borra datos), listar/actualizar, leer, escribir, eliminar, importar y exportar archivos.
+- Dispositivos típicos:
+    - Windows: `\\.\PhysicalDrive2`
+    - Linux: `/dev/sdc`
 
 ## Integración con Makefile
 
