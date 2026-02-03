@@ -168,6 +168,12 @@ $(BUILD_DIR)/microfs_asm.o: $(MICROFS_DIR)/microfs_asm.s
 ### v1.0.0
 - Versión inicial
 
+## 💖 Apóyame
+
+Si disfrutas de este proyecto, considera apoyarme:
+
+[![Support me on Ko-fi](https://img.shields.io/badge/Ko--fi-Apóyame-FF5E5B?logo=kofi&logoColor=white&style=for-the-badge)](https://ko-fi.com/nelsonfigueroa2k)
+
 ## Licencia
 
 MIT License - ver [LICENSE](LICENSE)
