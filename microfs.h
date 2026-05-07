@@ -46,8 +46,11 @@ uint8_t mfs_open(const char *name);
 /* Crear archivo nuevo (reserva sectores) */
 uint8_t mfs_create(const char *name, uint16_t size);
 
-/* Leer bytes (retorna bytes leídos) */
+/* Leer bytes (retorna bytes leÃ­dos) */
 uint16_t mfs_read(void *buf, uint16_t len);
+
+/* Leer con parÃ¡metros en ZP fijo ($F0-$F3) para ROM API */
+uint16_t mfs_read_ext(void);
 
 /* Escribir bytes (retorna bytes escritos) */
 uint16_t mfs_write(const void *buf, uint16_t len);

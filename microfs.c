@@ -176,6 +176,16 @@ uint16_t mfs_read(void *buf, uint16_t len) {
     return total;
 }
 
+/* mfs_read_ext - VersiÃ³n ROM API con parÃ¡metros en ZP fijo
+ * Input:  $00F0-$00F1 = buffer ptr, $00F2-$00F3 = len
+ * Output: A/X = bytes leÃ­dos (uint16_t)
+ */
+uint16_t mfs_read_ext(void) {
+    uint8_t *buf = (uint8_t *)(*(unsigned int *)0xF0);
+    uint16_t len = *(unsigned int *)0xF2;
+    return mfs_read(buf, len);
+}
+
 uint16_t mfs_write(const void *buf, uint16_t len) {
     const uint8_t *src = (const uint8_t *)buf;
     uint16_t total = 0;
