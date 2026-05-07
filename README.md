@@ -42,10 +42,11 @@ uint8_t mfs_format(void);                             // Formatear
 uint8_t mfs_create(const char *name, uint16_t size);  // Crear y abrir
 uint8_t mfs_open(const char *name);                   // Abrir existente
 uint16_t mfs_read(void *buf, uint16_t len);           // Leer bytes
+uint16_t mfs_read_ext(void);                          // Leer con params en ZP fijo (ROM API)
 uint16_t mfs_write(const void *buf, uint16_t len);    // Escribir bytes
 void mfs_close(void);                                  // Cerrar
 uint8_t mfs_delete(const char *name);                 // Eliminar
-uint16_t mfs_get_size(void);                          // Tamaño archivo abierto
+uint16_t mfs_get_size(void);                          // TamaÃ±o archivo abierto
 
 // Listado
 uint8_t mfs_list(uint8_t index, mfs_fileinfo_t *info);
