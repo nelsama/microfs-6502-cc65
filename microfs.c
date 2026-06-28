@@ -132,8 +132,19 @@ uint8_t mfs_create(const char *name, uint16_t size) {
         sd_write_sector(sect, secbuf);
     }
     
-    /* Abrir el archivo creado */
-    return mfs_open(name);
+    /* Cerrar archivo abierto previamente (por si acaso) */
+    mfs_close();
+    
+    /* Inicializar estado del archivo manualmente (evita comparación de nombre truncado) */
+    f_open = 1;
+    f_dirty = 0;
+    f_idx = slot;
+    f_start = p[12] | ((uint16_t)p[13] << 8);
+    f_size = p[14] | ((uint16_t)p[15] << 8);
+    f_pos = 0;
+    f_sector = f_start;
+    f_offset = 512;
+    return MFS_OK;
 }
 
 uint16_t mfs_read(void *buf, uint16_t len) {
