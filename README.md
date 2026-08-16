@@ -46,7 +46,8 @@ uint16_t mfs_read_ext(void);                          // Leer con params en ZP f
 uint16_t mfs_write(const void *buf, uint16_t len);    // Escribir bytes
 void mfs_close(void);                                  // Cerrar
 uint8_t mfs_delete(const char *name);                 // Eliminar
-uint16_t mfs_get_size(void);                          // TamaÃ±o archivo abierto
+uint16_t mfs_get_size(void);                          // Tamaño archivo abierto
+uint8_t mfs_seek(uint16_t offset);                   // Reposicionar puntero
 
 // Listado
 uint8_t mfs_list(uint8_t index, mfs_fileinfo_t *info);
@@ -155,6 +156,9 @@ $(BUILD_DIR)/microfs_asm.o: $(MICROFS_DIR)/microfs_asm.s
 - RAM requerida: ~1024 bytes en BSS (buffers)
 
 ## Changelog
+
+### v1.2.0
+- **Nuevo**: función `mfs_seek()` para reposicionar el puntero de lectura/escritura del archivo abierto
 
 ### v1.1.0
 - **Fix**: Corregido bug en `mfs_read()` y `mfs_write()` que fallaba al leer/escribir archivos mayores a 512 bytes

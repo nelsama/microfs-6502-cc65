@@ -67,4 +67,7 @@ uint8_t mfs_list(uint8_t index, mfs_fileinfo_t *info);
 /* Obtener tamaño del archivo abierto */
 uint16_t mfs_get_size(void);
 
+/* Reposicionar el puntero del archivo abierto */
+uint8_t mfs_seek(uint16_t offset);
+
 #endif

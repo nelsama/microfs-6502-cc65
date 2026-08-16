@@ -289,3 +289,19 @@ uint8_t mfs_list(uint8_t index, mfs_fileinfo_t *info) {
 uint16_t mfs_get_size(void) {
     return f_size;
 }
+
+/* Reposicionar el puntero del archivo abierto */
+uint8_t mfs_seek(uint16_t offset) {
+    if (!f_open) return MFS_ERR_NOTFOUND;
+    if (offset > f_size) return MFS_ERR_NOTFOUND;
+
+    /* Guardar sector pendiente antes de mover el puntero */
+    if (f_dirty) {
+        sd_write_sector(f_sector, secbuf);
+        f_dirty = 0;
+    }
+
+    f_pos = offset;
+    f_offset = 512;  /* forzar recarga de sector */
+    return MFS_OK;
+}
